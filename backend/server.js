@@ -12,3 +12,8 @@ const sequelize = new Sequelize('conference-db', 'user', 'password',{
 })
 
 //module.exports = sequelize;
+
+const User = require('./User');
+const Conference = require('./Conference');
+const Article = require('./Article');
+const Review = require('./Review');
