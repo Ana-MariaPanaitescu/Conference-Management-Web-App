@@ -14,6 +14,24 @@ const sequelize = new Sequelize('conference-db', 'user', 'password',{
 //module.exports = sequelize;
 
 const User = require('./User');
-const Conference = require('./Conference');
-const Article = require('./Article');
-const Review = require('./Review');
+const Conference = require('../classes/Conference');
+const Article = require('../classes/Article');
+const Review = require('../classes/Review');
+
+// Relationships between tables of the database
+
+// An organizer creates conferences
+Conference.belongsTo(User, { foreignKey: 'organizerId' });
+User.hasMany(Conference, { foreignKey: 'organizerId' });
+
+// An author submits articles
+Article.belongsTo(User, { foreignKey: 'authorId' });
+User.hasMany(Article, { foreignKey: 'authorId' });
+
+// An article has multiple reviews
+Article.hasMany(Review, { foreignKey: 'articleId' });
+Review.belongsTo(Article, { foreignKey: 'articleId' });
+
+// A reviewer can review many articles
+User.hasMany(Review, { foreignKey: 'reviewerId' });
+Review.belongsTo(User, { foreignKey: 'reviewerId' });
