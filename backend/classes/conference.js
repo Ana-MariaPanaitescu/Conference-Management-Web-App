@@ -1,19 +1,17 @@
-// const { DataTypes } = require('sequelize');
-// const sequelize = require('../server'); // Reference to sequelize instance from server.js (../ -  is the parent of the current directory - backend)
-
-const { sequelize, Sequelize } = require('../server');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../server'); // Reference to sequelize instance from server.js (../ -  is the parent of the current directory - backend)
 
 const Conference = sequelize.define('Conference', {
     title: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false
     },
     description: {
-        type: Sequelize.TEXT,
+        type: DataTypes.TEXT,
         allowNull: false
     },
     date: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         allowNull: false
     }
 });

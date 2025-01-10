@@ -1,15 +1,13 @@
-// const { DataTypes } = require('sequelize');
-// const sequelize = require('../db');
-
-const { sequelize, Sequelize } = require('../server');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../server');
 
 const Review = sequelize.define('Review', {
   feedback: {
-    type: Sequelize.TEXT,
+    type: DataTypes.TEXT,
     allowNull: true
   },
   status: {
-    type: Sequelize.ENUM('accepted', 'rejected', 'needs revision'),
+    type: DataTypes.ENUM('accepted', 'rejected', 'needs revision'),
     defaultValue: 'needs revision'
   }
 });

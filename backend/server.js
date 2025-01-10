@@ -11,8 +11,10 @@ const sequelize = new Sequelize('conference-db', 'user', 'password',{
     storage: 'db.sqlite' //Database file
 })
 
+
 //module.exports = sequelize;
 
+// Import classes
 const User = require('./classes/User');
 const Conference = require('./classes/Conference');
 const Article = require('./classes/Article');
@@ -35,3 +37,12 @@ Review.belongsTo(Article, { foreignKey: 'articleId' });
 // A reviewer can review many articles
 User.hasMany(Review, { foreignKey: 'reviewerId' });
 Review.belongsTo(User, { foreignKey: 'reviewerId' });
+
+// Middleware configuration
+
+// Initialize Express app
+const app = express()
+
+// Middlewares
+app.use(cors())
+app.use(bodyParser.json())

@@ -1,19 +1,17 @@
-// const { DataTypes } = require('sequelize');
-// const sequelize = require('../db');
-
-const { sequelize, Sequelize } = require('../server');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../server');
 
 const Article = sequelize.define('Article', {
   title: {
-    type: Sequelize.STRING,
+    type: DataTypes.STRING,
     allowNull: false
   },
   content: {
-    type: Sequelize.TEXT,
+    type: DataTypes.TEXT,
     allowNull: false
   },
   status: {
-    type: Sequelize.ENUM('submitted', 'under review', 'approved', 'rejected'),
+    type: DataTypes.ENUM('submitted', 'under review', 'approved', 'rejected'),
     defaultValue: 'submitted'
   }
 });
