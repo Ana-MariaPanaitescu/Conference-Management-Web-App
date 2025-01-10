@@ -13,10 +13,10 @@ const sequelize = new Sequelize('conference-db', 'user', 'password',{
 
 //module.exports = sequelize;
 
-const User = require('./User');
-const Conference = require('../classes/Conference');
-const Article = require('../classes/Article');
-const Review = require('../classes/Review');
+const User = require('./classes/User');
+const Conference = require('./classes/Conference');
+const Article = require('./classes/Article');
+const Review = require('./classes/Review');
 
 // Relationships between tables of the database
 
