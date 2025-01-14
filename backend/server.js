@@ -6,11 +6,11 @@ const bodyParser = require('body-parser')
 const Sequelize = require('sequelize')
 const cors = require ('cors')
 
+// Creating the database
 const sequelize = new Sequelize('conference-db', 'user', 'password',{
     dialect:'sqlite',
     storage: 'db.sqlite' //Database file
 })
-
 
 //module.exports = sequelize;
 
@@ -23,12 +23,12 @@ const Review = require('./classes/Review');
 // Relationships between tables of the database
 
 // An organizer creates conferences
-Conference.belongsTo(User, { foreignKey: 'organizerId' });
 User.hasMany(Conference, { foreignKey: 'organizerId' });
+Conference.belongsTo(User, { foreignKey: 'organizerId' });
 
 // An author submits articles
-Article.belongsTo(User, { foreignKey: 'authorId' });
 User.hasMany(Article, { foreignKey: 'authorId' });
+Article.belongsTo(User, { foreignKey: 'authorId' });
 
 // An article has multiple reviews
 Article.hasMany(Review, { foreignKey: 'articleId' });

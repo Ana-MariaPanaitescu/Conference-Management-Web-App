@@ -16,4 +16,4 @@ const Conference = sequelize.define('Conference', {
     }
 });
 
-//module.exports = Conference;
+module.exports = Conference;
