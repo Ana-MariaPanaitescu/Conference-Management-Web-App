@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Article = require('../classes/Article');
-// const User = require('../classes/User');
-// const Review = require('../classes/Review');
-// const Conference = require('../classes/Conference');
+const User = require('../classes/User');
+const Review = require('../classes/Review');
+const Conference = require('../classes/Conference');
 
 // Create a new article
 router.post('/articles', async (req, res) => {
@@ -11,8 +11,17 @@ router.post('/articles', async (req, res) => {
         const { title, content, authorId, conferenceId } = req.body;
 
         // Validate the required fields
-        if (!title || !content || !authorId || !conferenceId) {
+        if(!title || !content || !authorId || !conferenceId) {
             return res.status(400).json({ error: 'Title, content, authorId and conferenceId are required' });
+        }
+
+         // Verify author exists
+        const author = await User.findOne({
+            where: { id: authorId, role: 'author' }
+        });
+
+        if(!author) {
+            return res.status(403).json({ error: 'Invalid author' });
         }
 
         const newArticle = await Article.create({
@@ -29,19 +38,23 @@ router.post('/articles', async (req, res) => {
             limit: 2 
         });
 
-        // if (reviewers.length < 2) {
-        //     await newArticle.destroy();
-        //     return res.status(400).json({ error: 'Not enough reviewers available' });
-        // }
+        if(reviewers.length < 2) {
+            await newArticle.destroy();
+            return res.status(400).json({ error: 'Not enough reviewers available' });
+        }
 
-        // // Create review assignments
-        // for (const reviewer of reviewers) {
-        //     await Review.create({
-        //         articleId: newArticle.id,
-        //         reviewerId: reviewer.id,
-        //         status: 'pending'
-        //     });
-        // }
+        // Create review assignments
+        for (const reviewer of reviewers) {
+            await Review.create({
+                articleId: newArticle.id,
+                reviewerId: reviewer.id,
+                status: 'needs revision'
+            });
+        }
+
+        // Update article status to under review
+        newArticle.status = 'under review';
+        await newArticle.save();
 
         res.status(201).json(newArticle);
     } catch (error) {
@@ -50,53 +63,31 @@ router.post('/articles', async (req, res) => {
     }
 });
 
-// Get all articles
-router.get('/articles', async (req, res) => {
-    try {
-        const articles = await Article.findAll();
-        // const articles = await Article.findAll({
-        //     include: [
-        //         { model: Review, include: [User] },
-        //         { model: Conference }
-        //     ]
-        // });
-        res.status(200).json(articles);
-    } catch (error) {
-        console.error('Error fetching articles:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-// Get articles by author
-// router.get('/articles/author/:authorId', async (req, res) => {
-//     try {
-//         const articles = await Article.findAll({
-//             where: { authorId: req.params.authorId },
-//             include: [{ model: Review, include: [User] }]
-//         });
-//         res.status(200).json(articles);
-//     } catch (error) {
-//         console.error('Error fetching author articles:', error);
-//         res.status(500).json({ error: 'Internal Server Error' });
-//     }
-// });
-
 // Update an article
 router.put('/articles/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, content, status } = req.body;
+        const { title, content, authorId } = req.body;
 
         const article = await Article.findByPk(id);
 
-        if (!article) {
+        if(!article) {
             return res.status(404).json({ error: 'Article not found' });
+        }
+
+        // Verify author
+        const author = await User.findOne({
+            where: { id: authorId, role: 'author' }
+        });
+
+        if(!author) {
+            return res.status(403).json({ error: 'Invalid author' });
         }
 
         // Update fields
         article.title = title || article.title;
         article.content = content || article.content;
-        article.status = status || article.status; // article.status = 'updated';
+        article.status = 'under review';
 
         await article.save();
         res.status(200).json(article);
@@ -106,59 +97,23 @@ router.put('/articles/:id', async (req, res) => {
     }
 });
 
-// Delete an article
-router.delete('/articles/:id', async (req, res) => {
+// Get all articles
+router.get('/articles', async (req, res) => {
     try {
-        const { id } = req.params;
-        const article = await Article.findByPk(id);
-
-        if (!article) {
-            return res.status(404).json({ error: 'Article not found' });
-        }
-
-        await article.destroy();
-        res.status(200).json({ message: 'Article deleted successfully' });
+        const articles = await Article.findAll({
+            include: [
+                { model: Review, include: [User] },
+                { model: Conference }
+            ]
+        });
+        res.status(200).json(articles);
     } catch (error) {
-        console.error('Error deleting the article:', error);
+        console.error('Error fetching articles:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-//Allocate Reviewers to an Article
-// router.post('/articles/:id/allocate-reviewers', async (req, res) => {
-//     try {
-//         const { id } = req.params;
-
-//         // Fetch the article
-//         const article = await Article.findByPk(id);
-//         if (!article) {
-//             return res.status(404).json({ error: 'Article not found.' });
-//         }
-
-//         // Fetch available reviewers (modify based on your logic)
-//         const reviewers = await User.findAll({ where: { role: 'reviewer' }, limit: 2 });
-
-//         if (reviewers.length < 2) {
-//             return res.status(400).json({ error: 'Not enough reviewers available.' });
-//         }
-
-//         // Assign reviewers to the article
-//         for (const reviewer of reviewers) {
-//             await Review.create({
-//                 articleId: article.id,
-//                 reviewerId: reviewer.id,
-//                 feedback: null,
-//                 status: 'pending',
-//             });
-//         }
-
-//         res.status(200).json({ message: 'Reviewers allocated successfully.' });
-//     } catch (error) {
-//         console.error('Error allocating reviewers:', error);
-//         res.status(500).json({ error: 'Internal Server Error' });
-//     }
-// });
-
+/*
 //Reviewer Accepts or Provides Feedback
 router.post('/articles/:id/review', async (req, res) => {
     try {
@@ -216,24 +171,16 @@ router.put('/articles/:id/upload', async (req, res) => {
     }
 });
 
-//Organizer Monitors Article States
-router.get('/articles/organizer/:organizerId', async (req, res) => {
+Get articles by author
+router.get('/articles/author/:authorId', async (req, res) => {
     try {
-        const { organizerId } = req.params;
-
-        // Fetch articles related to the organizer's conferences
         const articles = await Article.findAll({
-            include: [
-                {
-                    model: Conference,
-                    where: { organizerId },
-                },
-            ],
+            where: { authorId: req.params.authorId },
+            include: [{ model: Review, include: [User] }]
         });
-
         res.status(200).json(articles);
     } catch (error) {
-        console.error('Error fetching organizer articles:', error);
+        console.error('Error fetching author articles:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -256,5 +203,46 @@ router.get('/articles/:id/reviews', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+//Organizer Monitors Article States
+router.get('/articles/organizer/:organizerId', async (req, res) => {
+    try {
+        const { organizerId } = req.params;
+
+        // Fetch articles related to the organizer's conferences
+        const articles = await Article.findAll({
+            include: [
+                {
+                    model: Conference,
+                    where: { organizerId },
+                },
+            ],
+        });
+
+        res.status(200).json(articles);
+    } catch (error) {
+        console.error('Error fetching organizer articles:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Delete an article
+router.delete('/articles/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const article = await Article.findByPk(id);
+
+        if (!article) {
+            return res.status(404).json({ error: 'Article not found' });
+        }
+
+        await article.destroy();
+        res.status(200).json({ message: 'Article deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting the article:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+ */
 
 module.exports = router;

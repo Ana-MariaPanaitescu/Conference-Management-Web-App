@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../classes/User');
+const bcrypt = require('bcrypt');
 
 // Create a new user
 router.post('/users', async (req, res) => {
@@ -21,13 +22,47 @@ router.post('/users', async (req, res) => {
         const newUser = await User.create({
             name,
             email,
-            password, // Note: In a real app, password should be hashed
+            password: hashedPassword,
             role
         });
+
+        // Remove password from response
+        const userResponse = newUser.toJSON();
+        delete userResponse.password;
 
         res.status(201).json(newUser);
     } catch (error) {
         console.error('Error creating user:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// User login
+router.post('/users/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if(!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
+        const user = await User.findOne({ where: { email } });
+        if(!user) {
+            return res.status(401).json({ error: 'Invalid email' });
+        }
+
+        const validPassword = await bcrypt.compare(password, user.password);
+        if(!validPassword) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+
+        // Remove password from response
+        const userResponse = user.toJSON();
+        delete userResponse.password;
+
+        res.status(200).json(userResponse);
+    } catch (error) {
+        console.error('Error during login:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
