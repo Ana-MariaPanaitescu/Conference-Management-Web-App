@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 module.exports = {
-    jwtSecret: process.env.JWT_SECRET || 'conference-secret-key',
+    jwtSecret: process.env.JWT_SECRET || 'your-super-secret-key',
     dbConfig: {
         database: process.env.DB_NAME || 'conference-db',
         username: process.env.DB_USER || 'user',
