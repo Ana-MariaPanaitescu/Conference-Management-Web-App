@@ -3,15 +3,17 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const Sequelize = require('sequelize');
 const cors = require ('cors');
 const config = require('./config');
+const sequelize = require('./database');
 
 // Creating the database
-const sequelize = new Sequelize('conference-db', 'user', 'password',{
-    dialect:'sqlite',
-    storage: 'db.sqlite' //Database file
-});
+// const sequelize = new Sequelize('conference-db', 'user', 'password',{
+//     dialect:'sqlite',
+//     storage: 'db.sqlite' //Database file
+// });
+
+module.exports = sequelize;
 
 // Import classes
 const User = require('./classes/User');
@@ -28,20 +30,17 @@ const reviewRoutes = require('./routes/reviewRoute');
 // Relationships between tables of the database
 
 // An organizer creates conferences
-User.hasMany(Conference, { foreignKey: 'organizerId' });
-Conference.belongsTo(User, { foreignKey: 'organizerId' });
+User.hasMany(Conference, { foreignKey: 'organizerId', as: 'organizer' });
+Conference.belongsTo(User, { foreignKey: 'organizerId', as: 'organizer' });
 
-// An author submits articles
-User.hasMany(Article, { foreignKey: 'authorId' });
-Article.belongsTo(User, { foreignKey: 'authorId' });
+User.hasMany(Article, { foreignKey: 'authorId', as: 'author' });
+Article.belongsTo(User, { foreignKey: 'authorId', as: 'author' });
 
-// An article has multiple reviews
 Article.hasMany(Review, { foreignKey: 'articleId' });
 Review.belongsTo(Article, { foreignKey: 'articleId' });
 
-// A reviewer can review many articles
-User.hasMany(Review, { foreignKey: 'reviewerId' });
-Review.belongsTo(User, { foreignKey: 'reviewerId' });
+User.hasMany(Review, { foreignKey: 'reviewerId', as: 'reviewer' });
+Review.belongsTo(User, { foreignKey: 'reviewerId', as: 'reviewer' });
 
 // Middleware configuration
 // Initialize Express app
@@ -66,12 +65,17 @@ app.use((err, req, res, next) => {
 
 
 // Database sync and server start
-sequelize.sync({ force: false }).then(() => {
-    app.listen(config.port, () => {
-        console.log(`Server is running on port ${config.port}`);
-    });
-}).catch(err => {
-    console.error('Unable to connect to the database:', err);
-});
+// Start server
+const startServer = async () => {
+    try {
+        await sequelize.sync({ force: false });
+        app.listen(config.port, () => {
+            console.log(`Server is running on port ${config.port}`);
+        });
+    } catch (error) {
+        console.error('Unable to start server:', error);
+        process.exit(1);
+    }
+};
 
-module.exports = sequelize;
+startServer();
