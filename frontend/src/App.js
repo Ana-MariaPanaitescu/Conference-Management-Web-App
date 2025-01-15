@@ -1,71 +1,77 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import Navigation from './components/Navigation';
-import PrivateRoute from './components/PrivateRoute';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import ConferenceList from './pages/conference/ConferenceList';
-import ConferenceDetail from './pages/conference/ConferenceDetail';
-import ArticleSubmission from './pages/conference/ArticleSubmission';
-import ReviewDashboard from './pages/conference/ReviewDashboard';
-import { Toaster } from 'react-hot-toast';
+import { AuthProvider } from './context/AuthContext';
+import Navbar from './components/common/Navbar';
+import PrivateRoute from './components/common/PrivateRoute';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import ConferenceList from './components/conference/ConferenceList';
+import ConferenceCreate from './components/conference/ConferenceCreate';
+import ArticleList from './components/article/ArticleList';
+import ArticleCreate from './components/article/ArticleCreate';
+import ArticleReview from './components/article/ArticleReview';
+import OrganizerDashboard from './components/dashboard/OrganizerDashboard';
+import ReviewerDashboard from './components/dashboard/ReviewerDashboard';
+import AuthorDashboard from './components/dashboard/AuthorDashboard';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <div className="min-h-screen bg-gray-100">
-          <Navigation />
+          <Navbar />
           <main className="container mx-auto px-4 py-8">
             <Routes>
+              <Route path="/" element={<Navigate to="/dashboard" />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route
-                path="/dashboard"
+              <Route 
+                path="/dashboard" 
                 element={
                   <PrivateRoute>
-                    <Dashboard />
+                    {(user) => {
+                      switch (user.role) {
+                        case 'organizer':
+                          return <OrganizerDashboard />;
+                        case 'reviewer':
+                          return <ReviewerDashboard />;
+                        case 'author':
+                          return <AuthorDashboard />;
+                        default:
+                          return <Navigate to="/login" />;
+                      }
+                    }}
                   </PrivateRoute>
-                }
+                } 
               />
-              <Route
-                path="/conferences"
+              <Route path="/conferences" element={<ConferenceList />} />
+              <Route 
+                path="/conferences/create" 
                 element={
-                  <PrivateRoute>
-                    <ConferenceList />
+                  <PrivateRoute roles={['organizer']}>
+                    <ConferenceCreate />
                   </PrivateRoute>
-                }
+                } 
               />
-              <Route
-                path="/conferences/:id"
+              <Route path="/articles" element={<ArticleList />} />
+              <Route 
+                path="/articles/create" 
                 element={
-                  <PrivateRoute>
-                    <ConferenceDetail />
+                  <PrivateRoute roles={['author']}>
+                    <ArticleCreate />
                   </PrivateRoute>
-                }
+                } 
               />
-              <Route
-                path="/conferences/:id/submit"
+              <Route 
+                path="/articles/:id/review" 
                 element={
-                  <PrivateRoute>
-                    <ArticleSubmission />
+                  <PrivateRoute roles={['reviewer']}>
+                    <ArticleReview />
                   </PrivateRoute>
-                }
+                } 
               />
-              <Route
-                path="/reviews"
-                element={
-                  <PrivateRoute>
-                    <ReviewDashboard />
-                  </PrivateRoute>
-                }
-              />
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </main>
-          <Toaster position="top-right" />
         </div>
       </Router>
     </AuthProvider>
