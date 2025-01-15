@@ -11,15 +11,15 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      fetchUser();
+      checkAuthStatus();
     } else {
       setLoading(false);
     }
   }, []);
 
-  const fetchUser = async () => {
+  const checkAuthStatus = async () => {
     try {
-      const response = await api.get('/users/profile');
+      const response = await api.get('/users/me');
       setUser(response.data);
     } catch (error) {
       localStorage.removeItem('token');
@@ -28,13 +28,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (credentials) => {
-    const response = await api.post('/users/login', credentials);
-    const { token, user } = response.data;
+  const login = async (email, password) => {
+    const response = await api.post('/users/login', { email, password });
+    const { token, user: userData } = response.data;
     localStorage.setItem('token', token);
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    setUser(user);
-    return user;
+    setUser(userData);
+    return userData;
+  };
+
+  const register = async (userData) => {
+    const response = await api.post('/users/register', userData);
+    const { token, user: newUser } = response.data;
+    localStorage.setItem('token', token);
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    setUser(newUser);
+    return newUser;
   };
 
   const logout = () => {
@@ -43,11 +52,25 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const value = {
+    user,
+    login,
+    register,
+    logout,
+    loading
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
-      {children}
+    <AuthContext.Provider value={value}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
