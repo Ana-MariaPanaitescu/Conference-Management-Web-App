@@ -25,14 +25,43 @@ const reviewRoutes = require('./routes/reviewRoute');
 User.hasMany(Conference, { foreignKey: 'organizerId', as: 'organizer' });
 Conference.belongsTo(User, { foreignKey: 'organizerId', as: 'organizer' });
 
+// Author - Article relationship
 User.hasMany(Article, { foreignKey: 'authorId', as: 'author' });
 Article.belongsTo(User, { foreignKey: 'authorId', as: 'author' });
 
+// Article - Review relationship
 Article.hasMany(Review, { foreignKey: 'articleId' });
 Review.belongsTo(Article, { foreignKey: 'articleId' });
 
+// Reviewer - Review relationship
 User.hasMany(Review, { foreignKey: 'reviewerId', as: 'reviewer' });
 Review.belongsTo(User, { foreignKey: 'reviewerId', as: 'reviewer' });
+
+// Many-to-Many relationship between Conference and User (reviewers)
+Conference.belongsToMany(User, {
+    through: 'ConferenceReviewers', 
+    as: 'reviewers',
+    foreignKey: 'conferenceId'
+});
+User.belongsToMany(Conference, {
+    through: 'ConferenceReviewers',
+    as: 'reviewingConferences',
+    foreignKey: 'userId'
+});
+
+// Articles belong to a Conference
+Conference.hasMany(Article, { foreignKey: 'conferenceId' });
+Article.belongsTo(Conference, { foreignKey: 'conferenceId' });
+
+// Article versions relationship (self-referential)
+// Article.belongsTo(Article, { 
+//     foreignKey: 'previousVersionId', 
+//     as: 'previousVersion' 
+// });
+// Article.hasOne(Article, { 
+//     foreignKey: 'previousVersionId', 
+//     as: 'nextVersion' 
+// });
 
 // Middleware configuration
 // Initialize Express app

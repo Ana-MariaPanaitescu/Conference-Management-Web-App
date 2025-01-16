@@ -5,8 +5,8 @@ const User = require('../classes/User');
 
 // Create a new conference
 router.post('/', async(req, res) => {
-    try{
-        const { title, description, date, organizerId } = req.body;
+    try {
+        const { title, description, date, organizerId, reviewerIds } = req.body; // Added reviewerIds to destructuring
 
         // Validate required fields
         if(!title || !description || !date || !organizerId) {
@@ -18,8 +18,8 @@ router.post('/', async(req, res) => {
             return res.status(400).json({ error: 'Invalid date format' });
         }
 
-         // Verify organizer exists and has correct role
-         const organizer = await User.findOne({
+        // Verify organizer exists and has correct role
+        const organizer = await User.findOne({
             where: { id: organizerId, role: 'organizer' }
         });
 
@@ -32,13 +32,13 @@ router.post('/', async(req, res) => {
             description, 
             date, 
             organizerId 
-        }); // claudiu zice sa nu punem organizerId
+        });
 
-        // If reviewer IDs provided, associate them with the conference
-        if(reviewerIds && Array.isArray(reviewerIds)) {
+        // Optional: Associate reviewers if reviewerIds is provided
+        if(req.body.reviewerIds && Array.isArray(req.body.reviewerIds)) {
             const reviewers = await User.findAll({
                 where: { 
-                    id: reviewerIds,
+                    id: req.body.reviewerIds,
                     role: 'reviewer'
                 }
             });
@@ -46,8 +46,8 @@ router.post('/', async(req, res) => {
         }
 
         res.status(201).json(newConference);
-    } catch (error){
-        console.error('Error while trying to create a conference:', error)
+    } catch (error) {
+        console.error('Error while trying to create a conference:', error);
         res.status(500).json({error:'Internal Server Error'});
     }
 });

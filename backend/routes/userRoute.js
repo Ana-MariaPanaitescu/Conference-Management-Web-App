@@ -40,7 +40,7 @@ router.post('/', async (req, res) => {
 });
 
 // User login
-router.post('/users/login', async (req, res) => {
+router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 

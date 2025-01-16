@@ -13,6 +13,18 @@ const Article = sequelize.define('Article', {
   status: {
     type: DataTypes.ENUM('submitted', 'under review', 'approved', 'rejected'),
     defaultValue: 'submitted'
+  },
+  conferenceId: {  
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Conferences',
+      key: 'id'
+    }
+  },
+  authorId: {
+    type: DataTypes.INTEGER,
+    allowNull: false
   }
 });
 

@@ -24,6 +24,12 @@ router.post('/', async (req, res) => {
             return res.status(403).json({ error: 'Invalid author' });
         }
 
+         // Verify conference exists
+         const conference = await Conference.findByPk(conferenceId);
+         if(!conference) {
+             return res.status(404).json({ error: 'Conference not found' });
+         }
+
         const newArticle = await Article.create({
             title,
             content,
@@ -32,8 +38,8 @@ router.post('/', async (req, res) => {
             status: 'submitted'
         });
 
-          // Automatically allocate 2 reviewers
-          const reviewers = await User.findAll({ 
+        // Automatically allocate 2 reviewers
+        const reviewers = await User.findAll({ 
             where: { role: 'reviewer' },
             limit: 2 
         });
@@ -102,8 +108,20 @@ router.get('/', async (req, res) => {
     try {
         const articles = await Article.findAll({
             include: [
-                { model: Review, include: [User] },
-                { model: Conference }
+                {
+                    model: Review,
+                    include: [{
+                        model: User,
+                        as: 'reviewer'  // This matches the alias in your relationships
+                    }]
+                },
+                {
+                    model: User,
+                    as: 'author'  // This matches the alias in your relationships
+                },
+                {
+                    model: Conference
+                }
             ]
         });
         res.status(200).json(articles);
