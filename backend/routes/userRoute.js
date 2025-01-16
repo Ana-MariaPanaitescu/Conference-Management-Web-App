@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../classes/User');
 const bcrypt = require('bcrypt');
+//const hashedPassword = await bcrypt.hash(password, 10);
 
 // Create a new user
 router.post('/users', async (req, res) => {

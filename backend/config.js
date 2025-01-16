@@ -18,5 +18,5 @@ module.exports = {
             pass: process.env.EMAIL_PASS
         }
     },
-    port: process.env.PORT || 3000
+    port: process.env.PORT || 3001
 };

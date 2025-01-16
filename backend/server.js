@@ -13,7 +13,7 @@ const sequelize = require('./database');
 //     storage: 'db.sqlite' //Database file
 // });
 
-module.exports = sequelize;
+//module.exports = sequelize;
 
 // Import classes
 const User = require('./classes/User');
@@ -63,6 +63,21 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Something broke!' });
 });
 
+// Added a route to check the server
+app.get('/', (req, res) => {
+    res.send('Server is running!');
+});
+
+// Verify if the database was created
+app.post('/sync', async (req, res, next) => {
+    try {
+        await sequelize.sync({ force: true }); // Use { force: false } if you don't want to drop existing tables
+        res.status(201).json({ message: 'Database created successfully!' });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+});
 
 // Database sync and server start
 // Start server
