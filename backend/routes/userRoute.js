@@ -2,10 +2,9 @@ const express = require('express');
 const router = express.Router();
 const User = require('../classes/User');
 const bcrypt = require('bcrypt');
-//const hashedPassword = await bcrypt.hash(password, 10);
 
 // Create a new user
-router.post('/users', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
@@ -19,6 +18,8 @@ router.post('/users', async (req, res) => {
         if (!validRoles.includes(role)) {
             return res.status(400).json({ error: `Role must be one of: ${validRoles.join(', ')}` });
         }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await User.create({
             name,
@@ -69,7 +70,7 @@ router.post('/users/login', async (req, res) => {
 });
 
 // Get all users
-router.get('/users', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const users = await User.findAll({
             attributes: { exclude: ['password'] }
@@ -82,7 +83,7 @@ router.get('/users', async (req, res) => {
 });
 
 // Get users by role
-router.get('/users/role/:role', async (req, res) => {
+router.get('/role/:role', async (req, res) => {
     try {
         const validRoles = ['organizer', 'reviewer', 'author'];
         if (!validRoles.includes(req.params.role)) {

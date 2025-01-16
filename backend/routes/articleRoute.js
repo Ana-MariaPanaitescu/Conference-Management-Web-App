@@ -6,7 +6,7 @@ const Review = require('../classes/Review');
 const Conference = require('../classes/Conference');
 
 // Create a new article
-router.post('/articles', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const { title, content, authorId, conferenceId } = req.body;
 
@@ -64,7 +64,7 @@ router.post('/articles', async (req, res) => {
 });
 
 // Update an article
-router.put('/articles/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { title, content, authorId } = req.body;
@@ -98,7 +98,7 @@ router.put('/articles/:id', async (req, res) => {
 });
 
 // Get all articles
-router.get('/articles', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const articles = await Article.findAll({
             include: [

@@ -7,14 +7,6 @@ const cors = require ('cors');
 const config = require('./config');
 const sequelize = require('./database');
 
-// Creating the database
-// const sequelize = new Sequelize('conference-db', 'user', 'password',{
-//     dialect:'sqlite',
-//     storage: 'db.sqlite' //Database file
-// });
-
-//module.exports = sequelize;
-
 // Import classes
 const User = require('./classes/User');
 const Conference = require('./classes/Conference');

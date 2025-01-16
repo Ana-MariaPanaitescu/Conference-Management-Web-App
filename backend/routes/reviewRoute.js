@@ -5,7 +5,7 @@ const Article = require('../classes/Article');
 const User = require('../classes/User');
 
 // Create a new review
-router.post('/reviews', async (req, res) => {
+router.post('/', async (req, res) => {
     try{
         const { articleId, reviewerId, feedback, status } = req.body;
 
@@ -49,7 +49,7 @@ router.post('/reviews', async (req, res) => {
 });
 
 // Update review
-router.put('/reviews/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
     try {
         const { feedback, status, reviewerId } = req.body;
         const { id } = req.params;
@@ -100,7 +100,7 @@ router.put('/reviews/:id', async (req, res) => {
 });
 
 // Get reviews by article
-router.get('/reviews/article/:articleId', async (req, res) => {
+router.get('/article/:articleId', async (req, res) => {
     try {
         const reviews = await Review.findAll({
             where: { articleId: req.params.articleId },
@@ -118,7 +118,7 @@ router.get('/reviews/article/:articleId', async (req, res) => {
 });
 
 // Get all reviews
-router.get('/reviews', async( req, res) => {
+router.get('/', async( req, res) => {
     try {
         const reviews = await Review.findAll();
         res.status(200).json(reviews);

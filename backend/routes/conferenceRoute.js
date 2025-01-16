@@ -4,7 +4,7 @@ const Conference = require('../classes/Conference');
 const User = require('../classes/User');
 
 // Create a new conference
-router.post('/conferences', async(req, res) => {
+router.post('/', async(req, res) => {
     try{
         const { title, description, date, organizerId } = req.body;
 
@@ -53,7 +53,7 @@ router.post('/conferences', async(req, res) => {
 });
 
 // Get all conferences
-router.get('/conferences', async (req, res) => {
+router.get('/', async (req, res) => {
     try{
         //const conferences = await Conference.findAll();
 
@@ -72,7 +72,7 @@ router.get('/conferences', async (req, res) => {
 });
 
 // Get conference by ID with all related data
-router.get('/conferences/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const conference = await Conference.findByPk(req.params.id, {
             include: [
