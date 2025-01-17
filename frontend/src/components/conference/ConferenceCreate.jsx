@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
+import AuthContext from '../../contexts/AuthContext'
 
 function ConferenceCreate() {
   const { user } = useContext(AuthContext);
