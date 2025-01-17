@@ -1,16 +1,19 @@
+// conferenceRoute.js
 const express = require('express');
 const router = express.Router();
 const Conference = require('../classes/Conference');
 const User = require('../classes/User');
+const auth = require('../middleware/auth'); // Import the auth middleware
 
-// Create a new conference
-router.post('/', async(req, res) => {
+// Create a new conference - Add auth middleware
+router.post('/', auth, async(req, res) => {
     try {
-        const { title, description, date, organizerId, reviewerIds } = req.body; // Added reviewerIds to destructuring
+        const { title, description, date, reviewerIds } = req.body;
+        const organizerId = req.user.id; // Get organizer ID from authenticated user
 
         // Validate required fields
-        if(!title || !description || !date || !organizerId) {
-            return res.status(400).json({ error: 'All fields are required' });
+        if(!title || !description || !date) {
+            return res.status(400).json({ error: 'Title, description and date are required' });
         }
 
         // Validate date format
@@ -18,29 +21,26 @@ router.post('/', async(req, res) => {
             return res.status(400).json({ error: 'Invalid date format' });
         }
 
-        // Verify organizer exists and has correct role
+        // Verify organizer role (additional security check)
         const organizer = await User.findOne({
             where: { id: organizerId, role: 'organizer' }
         });
-
+        
         if(!organizer) {
-            return res.status(400).json({ error: 'Invalid organizer' });
+            return res.status(403).json({ error: 'User must be an organizer to create conferences' });
         }
 
-        const newConference = await Conference.create({ 
-            title, 
-            description, 
-            date, 
-            organizerId 
+        const newConference = await Conference.create({
+            title,
+            description,
+            date,
+            organizerId
         });
 
         // Optional: Associate reviewers if reviewerIds is provided
-        if(req.body.reviewerIds && Array.isArray(req.body.reviewerIds)) {
+        if(reviewerIds && Array.isArray(reviewerIds)) {
             const reviewers = await User.findAll({
-                where: { 
-                    id: req.body.reviewerIds,
-                    role: 'reviewer'
-                }
+                where: { id: reviewerIds, role: 'reviewer' }
             });
             await newConference.addReviewers(reviewers);
         }
@@ -48,47 +48,6 @@ router.post('/', async(req, res) => {
         res.status(201).json(newConference);
     } catch (error) {
         console.error('Error while trying to create a conference:', error);
-        res.status(500).json({error:'Internal Server Error'});
-    }
-});
-
-// Get all conferences
-router.get('/', async (req, res) => {
-    try{
-        //const conferences = await Conference.findAll();
-
-        const conferences = await Conference.findAll({
-            include: [
-                { model: User, as: 'organizer' },
-                { model: User, as: 'reviewers' }
-            ]
-        });
-
-        res.status(200).json(conferences);
-    }catch(error){
-        console.error('Error fetching the conferences:', error);
-        res.status(500).json({error:'Internal Server Error'});
-    }
-});
-
-// Get conference by ID with all related data
-router.get('/:id', async (req, res) => {
-    try {
-        const conference = await Conference.findByPk(req.params.id, {
-            include: [
-                { model: User, as: 'organizer' },
-                { model: User, as: 'reviewers' }
-                //{ model: Article, include: [Review] }
-            ]
-        });
-        
-        if(!conference) {
-            return res.status(404).json({ error: 'Conference not found' });
-        }
-        
-        res.status(200).json(conference);
-    } catch(error) {
-        console.error('Error fetching the conference:', error);
         res.status(500).json({error: 'Internal Server Error'});
     }
 });
