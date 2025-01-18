@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const User = require('../classes/User');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const config = require('../config');
 
 // Create a new user
 router.post('/', async (req, res) => {
@@ -58,11 +60,22 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid password' });
         }
 
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user.id, role: user.role },
+            config.jwtSecret,
+            { expiresIn: '24h' }
+        );
+
         // Remove password from response
         const userResponse = user.toJSON();
         delete userResponse.password;
 
-        res.status(200).json(userResponse);
+        // Send token with user data
+        res.status(200).json({
+            user: userResponse,
+            token
+        });
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).json({ error: 'Internal Server Error' });

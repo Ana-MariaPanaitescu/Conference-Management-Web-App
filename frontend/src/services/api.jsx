@@ -7,6 +7,7 @@ export const api = axios.create({
   }
 });
 
+// Modify the interceptor to match your login implementation
 api.interceptors.request.use(config => {
   const user = JSON.parse(localStorage.getItem('user'));
   if (user?.token) {
@@ -15,7 +16,45 @@ api.interceptors.request.use(config => {
   return config;
 });
 
-// Article-related API calls
+// Conference-related API calls
+export const createConference = async (conferenceData) => {
+  try {
+    const response = await api.post('/conferences', conferenceData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getConferences = async () => {
+  try {
+    const response = await api.get('/conferences');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getConferenceById = async (conferenceId) => {
+  try {
+    const response = await api.get(`/conferences/${conferenceId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// User-related API calls
+export const getReviewers = async () => {
+  try {
+    const response = await api.get('/users/role/reviewer');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Existing Article-related API calls
 export const createArticle = async (articleData) => {
   try {
     const response = await api.post('/articles', articleData);
@@ -28,13 +67,12 @@ export const createArticle = async (articleData) => {
 export const getAuthorArticles = async (authorId) => {
   try {
     const response = await api.get(`/articles/author/${authorId}`);
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
 };
 
-// You might want to add these additional article-related functions
 export const getArticleById = async (articleId) => {
   try {
     const response = await api.get(`/articles/${articleId}`);

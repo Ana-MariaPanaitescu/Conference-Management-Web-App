@@ -1,31 +1,63 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
-import AuthContext from '../../contexts/AuthContext'
+import AuthContext from '../../contexts/AuthContext';
 
 function ConferenceCreate() {
   const { user } = useContext(AuthContext);
+  const [reviewers, setReviewers] = useState([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    date: ''
+    date: '',
+    reviewerIds: [] // Add this for reviewer selection
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Fetch available reviewers when component mounts
+  useEffect(() => {
+    const fetchReviewers = async () => {
+      try {
+        const response = await api.get('/users/role/reviewer');
+        setReviewers(response.data);
+      } catch (error) {
+        setError('Failed to fetch reviewers');
+      }
+    };
+    fetchReviewers();
+  }, []);
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === 'reviewerIds') {
+      // Handle multiple select for reviewers
+      const selectedReviewers = Array.from(e.target.selectedOptions, option => Number(option.value));
+      setFormData({ ...formData, reviewerIds: selectedReviewers });
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/conferences', formData);
+      // Ensure at least 2 reviewers are selected
+      if (formData.reviewerIds.length < 2) {
+        setError('Please select at least 2 reviewers');
+        return;
+      }
+
+      const response = await api.post('/conferences', formData);
       navigate('/dashboard');
     } catch (error) {
       setError(error.response?.data?.error || 'Failed to create conference');
     }
   };
+
+  // Redirect if user is not an organizer
+  if (user?.role !== 'organizer') {
+    return <div>Only organizers can create conferences</div>;
+  }
 
   return (
     <div className="max-w-md mx-auto mt-8">
@@ -64,6 +96,23 @@ function ConferenceCreate() {
             required
           />
         </div>
+        <div>
+          <label className="block text-gray-700 mb-2">Select Reviewers (minimum 2)</label>
+          <select
+            name="reviewerIds"
+            multiple
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+            required
+          >
+            {reviewers.map(reviewer => (
+              <option key={reviewer.id} value={reviewer.id}>
+                {reviewer.name} ({reviewer.email})
+              </option>
+            ))}
+          </select>
+          <small className="text-gray-500">Hold Ctrl/Cmd to select multiple reviewers</small>
+        </div>
         {error && <p className="text-red-500">{error}</p>}
         <button
           type="submit"
@@ -74,6 +123,6 @@ function ConferenceCreate() {
       </form>
     </div>
   );
-};
+}
 
 export default ConferenceCreate;
