@@ -32,6 +32,11 @@ router.post('/', auth, checkRole(['organizer']), async(req, res) => {
             return res.status(400).json({ error: 'One or more invalid reviewer IDs' });
         }
 
+        // Added validation for minimum 2 reviewers requirement
+        if (reviewerIds.length < 2) {
+            return res.status(400).json({ error: 'At least 2 reviewers are required' });
+        }
+
         // Create conference
         const newConference = await Conference.create({ 
             title, 

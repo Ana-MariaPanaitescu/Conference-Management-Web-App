@@ -4,6 +4,7 @@ const Article = require('../classes/Article');
 const User = require('../classes/User');
 const Review = require('../classes/Review');
 const Conference = require('../classes/Conference');
+const { auth, checkRole } = require('../middleware/auth');
 
 // Create a new article
 router.post('/', async (req, res) => {
@@ -69,6 +70,72 @@ router.post('/', async (req, res) => {
     }
 });
 
+// // Create a new article
+// router.post('/', auth, checkRole(['author']), async (req, res) => {
+//     try {
+//         const { title, content, conferenceId } = req.body;
+//         const authorId = req.user.id;
+
+//         // Validate required fields
+//         if (!title || !content || !conferenceId) {
+//             return res.status(400).json({ error: 'Title, content, and conferenceId are required' });
+//         }
+
+//         // Verify conference exists
+//         const conference = await Conference.findByPk(conferenceId, {
+//             include: [{ model: User, as: 'reviewers' }]
+//         });
+        
+//         if (!conference) {
+//             return res.status(404).json({ error: 'Conference not found' });
+//         }
+
+//         // Check if conference has enough reviewers
+//         if (conference.reviewers.length < 2) {
+//             return res.status(400).json({ error: 'Conference needs at least 2 reviewers' });
+//         }
+
+//         // Create article
+//         const newArticle = await Article.create({
+//             title,
+//             content,
+//             authorId,
+//             conferenceId,
+//             status: 'submitted'
+//         });
+
+//         // Randomly assign 2 unique reviewers
+//         const shuffledReviewers = conference.reviewers.sort(() => 0.5 - Math.random());
+//         const selectedReviewers = shuffledReviewers.slice(0, 2);
+
+//         // Create reviews
+//         await Promise.all(selectedReviewers.map(reviewer => 
+//             Review.create({
+//                 articleId: newArticle.id,
+//                 reviewerId: reviewer.id,
+//                 status: 'needs revision'
+//             })
+//         ));
+
+//         // Update article status
+//         await newArticle.update({ status: 'under review' });
+
+//         // Fetch complete article data with reviews
+//         const articleWithReviews = await Article.findByPk(newArticle.id, {
+//             include: [
+//                 { model: Review, include: [{ model: User, as: 'reviewer' }] },
+//                 { model: User, as: 'author' },
+//                 { model: Conference }
+//             ]
+//         });
+
+//         res.status(201).json(articleWithReviews);
+//     } catch (error) {
+//         console.error('Error creating article:', error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
+
 // Update an article
 router.put('/:id', async (req, res) => {
     try {
@@ -130,6 +197,47 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+// // Get articles by conference
+// router.get('/conference/:conferenceId', auth, async (req, res) => {
+//     try {
+//         const articles = await Article.findAll({
+//             where: { conferenceId: req.params.conferenceId },
+//             include: [
+//                 { 
+//                     model: Review,
+//                     include: [{ model: User, as: 'reviewer' }]
+//                 },
+//                 { model: User, as: 'author' },
+//                 { model: Conference }
+//             ]
+//         });
+//         res.status(200).json(articles);
+//     } catch (error) {
+//         console.error('Error fetching conference articles:', error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
+
+// // Get articles by author
+// router.get('/author', auth, checkRole(['author']), async (req, res) => {
+//     try {
+//         const articles = await Article.findAll({
+//             where: { authorId: req.user.id },
+//             include: [
+//                 { 
+//                     model: Review,
+//                     include: [{ model: User, as: 'reviewer' }]
+//                 },
+//                 { model: Conference }
+//             ]
+//         });
+//         res.status(200).json(articles);
+//     } catch (error) {
+//         console.error('Error fetching author articles:', error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
 
 /*
 //Reviewer Accepts or Provides Feedback

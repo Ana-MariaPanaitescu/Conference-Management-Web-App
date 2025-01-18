@@ -3,6 +3,7 @@ const router = express.Router();
 const Review = require('../classes/Review');
 const Article = require('../classes/Article');
 const User = require('../classes/User');
+//const reviewRouter = express.Router();
 
 // Create a new review
 router.post('/', async (req, res) => {
@@ -99,6 +100,65 @@ router.put('/:id', async (req, res) => {
     }
 });
 
+// // Update review with feedback
+// reviewRouter.put('/:id', auth, checkRole(['reviewer']), async (req, res) => {
+//     try {
+//         const { feedback, status } = req.body;
+//         const reviewId = req.params.id;
+//         const reviewerId = req.user.id;
+
+//         // Validate status
+//         const validStatuses = ['accepted', 'rejected', 'needs revision'];
+//         if (!validStatuses.includes(status)) {
+//             return res.status(400).json({ error: 'Invalid status' });
+//         }
+
+//         // Find review
+//         const review = await Review.findByPk(reviewId);
+//         if (!review) {
+//             return res.status(404).json({ error: 'Review not found' });
+//         }
+
+//         // Verify reviewer
+//         if (review.reviewerId !== reviewerId) {
+//             return res.status(403).json({ error: 'Unauthorized - not the reviewer' });
+//         }
+
+//         // Update review
+//         await review.update({ feedback, status });
+
+//         // Check all reviews status and update article status
+//         const allReviews = await Review.findAll({ 
+//             where: { articleId: review.articleId } 
+//         });
+        
+//         const article = await Article.findByPk(review.articleId);
+//         const allAccepted = allReviews.every(r => r.status === 'accepted');
+//         const anyRejected = allReviews.some(r => r.status === 'rejected');
+        
+//         if (allAccepted) {
+//             await article.update({ status: 'approved' });
+//         } else if (anyRejected) {
+//             await article.update({ status: 'rejected' });
+//         } else {
+//             await article.update({ status: 'under review' });
+//         }
+
+//         // Get updated review with related data
+//         const updatedReview = await Review.findByPk(reviewId, {
+//             include: [
+//                 { model: Article },
+//                 { model: User, as: 'reviewer' }
+//             ]
+//         });
+
+//         res.status(200).json(updatedReview);
+//     } catch (error) {
+//         console.error('Error updating review:', error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
+
 // Get reviews by article
 router.get('/article/:articleId', async (req, res) => {
     try {
@@ -128,6 +188,28 @@ router.get('/', async( req, res) => {
     }
 });
 
+// // Get reviews assigned to reviewer
+// reviewRouter.get('/assigned', auth, checkRole(['reviewer']), async (req, res) => {
+//     try {
+//         const reviews = await Review.findAll({
+//             where: { reviewerId: req.user.id },
+//             include: [
+//                 { 
+//                     model: Article,
+//                     include: [
+//                         { model: Conference },
+//                         { model: User, as: 'author' }
+//                     ]
+//                 }
+//             ]
+//         });
+//         res.status(200).json(reviews);
+//     } catch (error) {
+//         console.error('Error fetching assigned reviews:', error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
+
 // // Get reviews by reviewer
 // router.get('/reviews/reviewer/:reviewerId', async (req, res) => {
 //     try {
@@ -143,3 +225,4 @@ router.get('/', async( req, res) => {
 // });
 
 module.exports = router;
+//module.exports = { articleRouter: router, reviewRouter };

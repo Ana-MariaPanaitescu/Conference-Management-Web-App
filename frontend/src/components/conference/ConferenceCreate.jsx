@@ -40,14 +40,14 @@ function ConferenceCreate() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      // Ensure at least 2 reviewers are selected
-      if (formData.reviewerIds.length < 2) {
-        setError('Please select at least 2 reviewers');
-        return;
-      }
+    
+    if (formData.reviewerIds.length < 2) {
+      setError('Please select at least 2 reviewers');
+      return;
+    }
 
-      const response = await api.post('/conferences', formData);
+    try {
+      await api.post('/conferences', formData);
       navigate('/dashboard');
     } catch (error) {
       setError(error.response?.data?.error || 'Failed to create conference');
