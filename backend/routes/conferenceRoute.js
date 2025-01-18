@@ -63,25 +63,56 @@ router.post('/', auth, checkRole(['organizer']), async(req, res) => {
     }
 });
 
-// Get conference by ID with all related data
+// Get all conferences
+router.get('/', async (req, res) => {
+    try {
+        const conferences = await Conference.findAll({
+            include: [
+                { 
+                    model: User, 
+                    as: 'organizer',
+                    attributes: ['id', 'name', 'email']
+                },
+                { 
+                    model: User, 
+                    as: 'reviewers',
+                    attributes: ['id', 'name', 'email']
+                }
+            ]
+        });
+        res.status(200).json(conferences);
+    } catch (error) {
+        console.error('Error fetching conferences:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Get conference by ID
 router.get('/:id', async (req, res) => {
     try {
         const conference = await Conference.findByPk(req.params.id, {
             include: [
-                { model: User, as: 'organizer' },
-                { model: User, as: 'reviewers' }
-                //{ model: Article, include: [Review] }
+                { 
+                    model: User, 
+                    as: 'organizer',
+                    attributes: ['id', 'name', 'email']
+                },
+                { 
+                    model: User, 
+                    as: 'reviewers',
+                    attributes: ['id', 'name', 'email']
+                }
             ]
         });
         
-        if(!conference) {
+        if (!conference) {
             return res.status(404).json({ error: 'Conference not found' });
         }
         
         res.status(200).json(conference);
-    } catch(error) {
-        console.error('Error fetching the conference:', error);
-        res.status(500).json({error: 'Internal Server Error'});
+    } catch (error) {
+        console.error('Error fetching conference:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
