@@ -1,65 +1,62 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { api } from '../../services/api';
-import { useAuth } from '../../contexts/AuthContext';
+import apiService from '../../services/api';
+import { REVIEW_STATUS } from '../../utils/constants';
 
-function ReviewForm({ articleId }) {
+const ReviewForm = ({ review, onReviewUpdate }) => {
   const [formData, setFormData] = useState({
-    feedback: '',
-    status: 'needs revision'
+    feedback: review.feedback || '',
+    status: review.status || REVIEW_STATUS.NEEDS_REVISION
   });
   const [error, setError] = useState('');
-  const navigate = useNavigate();
-  const { user } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/reviews', {
-        ...formData,
-        articleId,
-        reviewerId: user.id
-      });
-      navigate('/dashboard');
+      const response = await apiService.updateReview(review.id, formData);
+      onReviewUpdate(response.data);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to submit review');
+      setError(err.response?.data?.error || 'Failed to update review');
     }
   };
 
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow">
-      <div className="mb-4">
-        <label className="block text-gray-700 font-bold mb-2">
-          Feedback
-        </label>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error && <div className="text-red-600">{error}</div>}
+      <div>
+        <label className="block mb-2">Feedback</label>
         <textarea
+          name="feedback"
           className="w-full p-2 border rounded"
-          rows="6"
           value={formData.feedback}
-          onChange={(e) => setFormData({ ...formData, feedback: e.target.value })}
+          onChange={handleChange}
           required
         />
       </div>
-      <div className="mb-4">
-        <label className="block text-gray-700 font-bold mb-2">
-          Status
-        </label>
+      <div>
+        <label className="block mb-2">Status</label>
         <select
+          name="status"
           className="w-full p-2 border rounded"
           value={formData.status}
-          onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+          onChange={handleChange}
+          required
         >
-          <option value="needs revision">Needs Revision</option>
-          <option value="accepted">Accept</option>
-          <option value="rejected">Reject</option>
+          {Object.values(REVIEW_STATUS).map(status => (
+            <option key={status} value={status}>
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </option>
+          ))}
         </select>
       </div>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <button
-        type="submit"
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-      >
-        Submit Review
+      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        Update Review
       </button>
     </form>
   );

@@ -55,16 +55,6 @@ User.belongsToMany(Conference, {
 Conference.hasMany(Article, { foreignKey: 'conferenceId' });
 Article.belongsTo(Conference, { foreignKey: 'conferenceId' });
 
-// Article versions relationship (self-referential)
-// Article.belongsTo(Article, { 
-//     foreignKey: 'previousVersionId', 
-//     as: 'previousVersion' 
-// });
-// Article.hasOne(Article, { 
-//     foreignKey: 'previousVersionId', 
-//     as: 'nextVersion' 
-// });
-
 // Middleware configuration
 // Initialize Express app
 const app = express();

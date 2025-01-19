@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../../services/api';
+import { Link } from 'react-router-dom';
+import apiService from '../../services/api';
+import ConferenceCard from './ConferenceCard';
+import { useAuth } from '../../contexts/AuthContext';
 
-function ConferenceList() {
+const ConferenceList = () => {
   const [conferences, setConferences] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchConferences = async () => {
       try {
-        const response = await api.get('/conferences');
+        const response = await apiService.getConferences();
         setConferences(response.data);
       } catch (err) {
         setError('Failed to fetch conferences');
@@ -17,25 +21,25 @@ function ConferenceList() {
         setLoading(false);
       }
     };
-
     fetchConferences();
   }, []);
 
   if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
+  if (error) return <div className="text-red-600">{error}</div>;
 
   return (
-    <div className="container mx-auto px-4">
-      <h1 className="text-2xl font-bold mb-6">Conferences</h1>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Conferences</h2>
+        {user.role === 'organizer' && (
+          <Link to="/conferences/create" className="btn btn-primary">
+            Create New Conference
+          </Link>
+        )}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {conferences.map(conference => (
-          <div key={conference.id} className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-2">{conference.title}</h2>
-            <p className="text-gray-600 mb-4">{conference.description}</p>
-            <p className="text-sm text-gray-500">
-              Date: {new Date(conference.date).toLocaleDateString()}
-            </p>
-          </div>
+          <ConferenceCard key={conference.id} conference={conference} />
         ))}
       </div>
     </div>

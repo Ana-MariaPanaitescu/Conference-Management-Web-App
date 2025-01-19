@@ -7,97 +7,60 @@ export const api = axios.create({
   }
 });
 
-// Modify the interceptor to match your login implementation
-api.interceptors.request.use(config => {
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (user?.token) {
-    config.headers.Authorization = `Bearer ${user.token}`;
+// Request interceptor for adding auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
-// Conference-related API calls
-export const createConference = async (conferenceData) => {
-  try {
-    const response = await api.post('/conferences', conferenceData);
-    return response.data;
-  } catch (error) {
-    throw error;
+// Response interceptor for handling common errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
   }
-};
-
-export const getConferences = async () => {
-  try {
-    const response = await api.get('/conferences');
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const getConferenceById = async (conferenceId) => {
-  try {
-    const response = await api.get(`/conferences/${conferenceId}`);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-// User-related API calls
-export const getReviewers = async () => {
-  try {
-    const response = await api.get('/users/role/reviewer');
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-// Existing Article-related API calls
-export const createArticle = async (articleData) => {
-  try {
-    const response = await api.post('/articles', articleData);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const getAuthorArticles = async (authorId) => {
-  try {
-    const response = await api.get(`/articles/author/${authorId}`);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const getArticleById = async (articleId) => {
-  try {
-    const response = await api.get(`/articles/${articleId}`);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const updateArticle = async (articleId, articleData) => {
-  try {
-    const response = await api.put(`/articles/${articleId}`, articleData);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const deleteArticle = async (articleId) => {
-  try {
-    const response = await api.delete(`/articles/${articleId}`);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
+);
 
 export default api;
+
+// // API methods
+// const apiService = {
+//   // Auth
+//   login: (credentials) => api.post('/users/login', credentials),
+//   register: (userData) => api.post('/users', userData),
+  
+//   // Conferences
+//   getConferences: () => api.get('/conferences'),
+//   getConferenceById: (id) => api.get(`/conferences/${id}`),
+//   createConference: (data) => api.post('/conferences', data),
+  
+//   // Articles
+//   getArticles: () => api.get('/articles'),
+//   getArticleById: (id) => api.get(`/articles/${id}`),
+//   getAuthorArticles: () => api.get('/articles/author'),
+//   createArticle: (data) => api.post('/articles', data),
+//   updateArticle: (id, data) => api.put(`/articles/${id}`, data),
+  
+//   // Reviews
+//   getReviewsByArticle: (articleId) => api.get(`/reviews/article/${articleId}`),
+//   getAssignedReviews: () => api.get('/reviews/assigned'),
+//   updateReview: (id, data) => api.put(`/reviews/${id}`, data),
+  
+//   // Users
+//   getUsersByRole: (role) => api.get(`/users/role/${role}`)
+// };
+
+// export default apiService;

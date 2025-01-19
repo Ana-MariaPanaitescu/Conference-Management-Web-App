@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-function Navbar() {
+const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -12,30 +12,53 @@ function Navbar() {
   };
 
   return (
-    <nav className="bg-gray-800 text-white p-4">
-      <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="text-xl font-bold">Conference Manager</Link>
-        <div className="space-x-4">
-          {user ? (
-            <>
-              <Link to="/dashboard">Dashboard</Link>
-              <Link to="/conferences">Conferences</Link>
-              {user.role === 'organizer' && (
-                <Link to="/conferences/create">Create Conference</Link>
-              )}
-              {user.role === 'author' && (
-                <Link to="/articles/create">Submit Article</Link>
-              )}
-              <button onClick={handleLogout} className="text-white">
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login">Login</Link>
-              <Link to="/register">Register</Link>
-            </>
-          )}
+    <nav className="bg-white shadow-lg">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-between h-16">
+          <div className="flex">
+            <Link to="/" className="flex items-center">
+              <span className="text-xl font-semibold">Conference Manager</span>
+            </Link>
+            {user && (
+              <div className="ml-10 flex items-center space-x-4">
+                <Link to="/conferences" className="text-gray-700 hover:text-gray-900">
+                  Conferences
+                </Link>
+                {user.role === 'author' && (
+                  <Link to="/articles" className="text-gray-700 hover:text-gray-900">
+                    My Articles
+                  </Link>
+                )}
+                {user.role === 'reviewer' && (
+                  <Link to="/reviews" className="text-gray-700 hover:text-gray-900">
+                    My Reviews
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="flex items-center">
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-700">{user.name}</span>
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-700 hover:text-gray-900"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link to="/login" className="text-gray-700 hover:text-gray-900">
+                  Login
+                </Link>
+                <Link to="/register" className="text-gray-700 hover:text-gray-900">
+                  Register
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>

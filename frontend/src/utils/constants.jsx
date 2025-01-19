@@ -23,17 +23,13 @@ export const REVIEW_STATUS = {
   NEEDS_REVISION: 'needs revision'
 };
 
-// Routes
-export const ROUTES = {
-  HOME: '/',
-  LOGIN: '/login',
-  REGISTER: '/register',
-  AUTHOR_DASHBOARD: '/author/dashboard',
-  REVIEWER_DASHBOARD: '/reviewer/dashboard',
-  ORGANIZER_DASHBOARD: '/organizer/dashboard',
-  CREATE_CONFERENCE: '/conferences/create',
-  CREATE_ARTICLE: '/articles/create',
-  REVIEW_ARTICLE: '/articles/:id/review'
+export const API_ROUTES = {
+  LOGIN: '/users/login',
+  REGISTER: '/users',
+  CONFERENCES: '/conferences',
+  ARTICLES: '/articles',
+  REVIEWS: '/reviews',
+  USERS: '/users'
 };
 
 // Form Validation

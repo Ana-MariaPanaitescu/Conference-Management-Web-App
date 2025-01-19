@@ -1,87 +1,91 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createArticle } from '../../services/api';
+import apiService from '../../services/api';
 
-const ArticleCreate = ({ conferenceId }) => {
-  const navigate = useNavigate();
+const ArticleCreate = () => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    conferenceId: conferenceId,
+    conferenceId: ''
   });
+  const [conferences, setConferences] = useState([]);
   const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
-  };
+  useEffect(() => {
+    const fetchConferences = async () => {
+      try {
+        const response = await apiService.getConferences();
+        setConferences(response.data);
+      } catch (err) {
+        setError('Failed to fetch conferences');
+      }
+    };
+    fetchConferences();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError('');
-
     try {
-      await createArticle(formData);
-      navigate('/author/dashboard');
+      await apiService.createArticle(formData);
+      navigate('/articles');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to submit article');
-    } finally {
-      setIsSubmitting(false);
+      setError(err.response?.data?.error || 'Failed to create article');
     }
   };
 
-  return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Submit New Article</h2>
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
+  return (
+    <div className="max-w-2xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Submit New Article</h2>
+      {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Title
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded mt-1"
-              disabled={isSubmitting}
-            />
-          </label>
+          <label className="block mb-2">Title</label>
+          <input
+            type="text"
+            name="title"
+            className="input-field"
+            value={formData.title}
+            onChange={handleChange}
+            required
+          />
         </div>
-
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Content
-            <textarea
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              required
-              rows="10"
-              className="w-full p-2 border rounded mt-1"
-              disabled={isSubmitting}
-            />
-          </label>
+          <label className="block mb-2">Content</label>
+          <textarea
+            name="content"
+            className="input-field min-h-[200px]"
+            value={formData.content}
+            onChange={handleChange}
+            required
+          />
         </div>
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:bg-blue-300"
-        >
-          {isSubmitting ? 'Submitting...' : 'Submit Article'}
+        <div>
+          <label className="block mb-2">Conference</label>
+          <select
+            name="conferenceId"
+            className="input-field"
+            value={formData.conferenceId}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select a conference</option>
+            {conferences.map(conference => (
+              <option key={conference.id} value={conference.id}>
+                {conference.title}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button type="submit" className="btn btn-primary w-full">
+          Submit Article
         </button>
       </form>
     </div>
