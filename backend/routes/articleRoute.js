@@ -19,7 +19,11 @@ router.post('/', auth, checkRole(['author']), async (req, res) => {
 
         // Verify conference exists
         const conference = await Conference.findByPk(conferenceId, {
-            include: [{ model: User, as: 'reviewers' }]
+            include: [{
+                model: User,
+                as: 'reviewers',
+                attributes: ['id', 'name', 'email', 'role']
+            }]
         });
         
         if (!conference) {
@@ -59,8 +63,19 @@ router.post('/', auth, checkRole(['author']), async (req, res) => {
         // Fetch complete article data with reviews
         const articleWithReviews = await Article.findByPk(newArticle.id, {
             include: [
-                { model: Review, include: [{ model: User, as: 'reviewer' }] },
-                { model: User, as: 'author' },
+                { 
+                    model: Review,
+                    include: [{
+                        model: User,
+                        as: 'reviewer',
+                        attributes: ['id', 'name', 'email', 'role']  // Exclude password
+                    }]
+                },
+                { 
+                    model: User,
+                    as: 'author',
+                    attributes: ['id', 'name', 'email', 'role']  
+                },
                 { model: Conference }
             ]
         });
@@ -97,9 +112,17 @@ router.put('/:id', auth, checkRole(['author']), async (req, res) => {
             include: [
                 { 
                     model: Review,
-                    include: [{ model: User, as: 'reviewer' }]
+                    include: [{
+                        model: User,
+                        as: 'reviewer',
+                        attributes: ['id', 'name', 'email', 'role']  // Exclude password
+                    }]
                 },
-                { model: User, as: 'author' },
+                { 
+                    model: User,
+                    as: 'author',
+                    attributes: ['id', 'name', 'email', 'role']  
+                },
                 { model: Conference }
             ]
         });
@@ -120,12 +143,14 @@ router.get('/', async (req, res) => {
                     model: Review,
                     include: [{
                         model: User,
-                        as: 'reviewer'  // This matches the alias in your relationships
+                        as: 'reviewer',
+                        attributes: ['name', 'email', 'role']  
                     }]
                 },
                 {
                     model: User,
-                    as: 'author'  // This matches the alias in your relationships
+                    as: 'author',
+                    attributes: ['id', 'name', 'email', 'role']  
                 },
                 {
                     model: Conference
@@ -147,9 +172,17 @@ router.get('/conference/:conferenceId', auth, async (req, res) => {
             include: [
                 { 
                     model: Review,
-                    include: [{ model: User, as: 'reviewer' }]
+                    include: [{
+                        model: User,
+                        as: 'reviewer',
+                        attributes: ['id', 'name', 'email', 'role']  
+                    }]
                 },
-                { model: User, as: 'author' },
+                { 
+                    model: User,
+                    as: 'author',
+                    attributes: ['id', 'name', 'email', 'role']  
+                },
                 { model: Conference }
             ]
         });
@@ -168,7 +201,11 @@ router.get('/author', auth, checkRole(['author']), async (req, res) => {
             include: [
                 { 
                     model: Review,
-                    include: [{ model: User, as: 'reviewer' }]
+                    include: [{
+                        model: User,
+                        as: 'reviewer',
+                        attributes: ['id', 'name', 'email', 'role']  
+                    }]
                 },
                 { model: Conference }
             ]

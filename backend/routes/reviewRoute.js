@@ -90,7 +90,11 @@ router.put('/:id', auth, checkRole(['reviewer']), async (req, res) => {
         const updatedReview = await Review.findByPk(reviewId, {
             include: [
                 { model: Article },
-                { model: User, as: 'reviewer' }
+                { 
+                    model: User,
+                    as: 'reviewer',
+                    attributes: ['id', 'name', 'email', 'role']  
+                }
             ]
         });
 
@@ -140,11 +144,16 @@ router.get('/assigned', auth, checkRole(['reviewer']), async (req, res) => {
                     model: Article,
                     include: [
                         { model: Conference },
-                        { model: User, as: 'author' }
+                        { 
+                            model: User,
+                            as: 'author',
+                            attributes: ['id', 'name', 'email', 'role'] 
+                        }
                     ]
                 }
             ]
         });
+
         res.status(200).json(reviews);
     } catch (error) {
         console.error('Error fetching assigned reviews:', error);

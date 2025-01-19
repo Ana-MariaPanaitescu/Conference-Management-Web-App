@@ -38,11 +38,13 @@ User.hasMany(Review, { foreignKey: 'reviewerId', as: 'reviewer' });
 Review.belongsTo(User, { foreignKey: 'reviewerId', as: 'reviewer' });
 
 // Many-to-Many relationship between Conference and User (reviewers)
+// This creates a junction table called 'ConferenceReviewers'
 Conference.belongsToMany(User, {
     through: 'ConferenceReviewers', 
     as: 'reviewers',
     foreignKey: 'conferenceId'
 });
+
 User.belongsToMany(Conference, {
     through: 'ConferenceReviewers',
     as: 'reviewingConferences',
