@@ -60,7 +60,10 @@ Article.belongsTo(Conference, { foreignKey: 'conferenceId' });
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000', // My frontend URL
+    credentials: true
+}));
 app.use(bodyParser.json());
 app.use(express.static('public'));
 

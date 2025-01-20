@@ -217,4 +217,37 @@ router.get('/author', auth, checkRole(['author']), async (req, res) => {
     }
 });
 
+// Get articles by id
+router.get('/:id', async (req, res) => {
+    try {
+        const article = await Article.findByPk(req.params.id, {
+            include: [
+                { 
+                    model: Review,
+                    include: [{
+                        model: User,
+                        as: 'reviewer',
+                        attributes: ['id', 'name', 'email', 'role']
+                    }]
+                },
+                { 
+                    model: User,
+                    as: 'author',
+                    attributes: ['id', 'name', 'email', 'role']
+                },
+                { model: Conference }
+            ]
+        });
+
+        if (!article) {
+            return res.status(404).json({ error: 'Article not found' });
+        }
+
+        res.status(200).json(article);
+    } catch (error) {
+        console.error('Error fetching article:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 module.exports = router;

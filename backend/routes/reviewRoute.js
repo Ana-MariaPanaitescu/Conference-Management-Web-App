@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Review = require('../classes/Review');
 const Article = require('../classes/Article');
+const Conference = require('../classes/Conference');
 const User = require('../classes/User');
 const { auth, checkRole } = require('../middleware/auth');
 
@@ -143,7 +144,7 @@ router.get('/assigned', auth, checkRole(['reviewer']), async (req, res) => {
                 { 
                     model: Article,
                     include: [
-                        { model: Conference },
+                        { model: Conference }, 
                         { 
                             model: User,
                             as: 'author',
