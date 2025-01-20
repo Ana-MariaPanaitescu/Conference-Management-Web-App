@@ -1,5 +1,5 @@
 // API Base URL
-export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 // User Roles
 export const USER_ROLES = {
@@ -23,6 +23,7 @@ export const REVIEW_STATUS = {
   NEEDS_REVISION: 'needs revision'
 };
 
+// API Routes
 export const API_ROUTES = {
   LOGIN: '/users/login',
   REGISTER: '/users',
@@ -32,12 +33,13 @@ export const API_ROUTES = {
   USERS: '/users'
 };
 
-// Form Validation
+// Form Validation Rules
 export const VALIDATION = {
   PASSWORD_MIN_LENGTH: 6,
   TITLE_MIN_LENGTH: 3,
   TITLE_MAX_LENGTH: 100,
-  CONTENT_MIN_LENGTH: 100
+  CONTENT_MIN_LENGTH: 100,
+  MIN_REVIEWERS: 2
 };
 
 // Error Messages
@@ -48,7 +50,10 @@ export const ERROR_MESSAGES = {
   NETWORK_ERROR: 'Network error. Please check your connection.',
   REQUIRED_FIELD: 'This field is required.',
   INVALID_EMAIL: 'Please enter a valid email address.',
-  PASSWORD_TOO_SHORT: `Password must be at least ${VALIDATION.PASSWORD_MIN_LENGTH} characters long.`
+  PASSWORD_TOO_SHORT: `Password must be at least ${VALIDATION.PASSWORD_MIN_LENGTH} characters long.`,
+  MIN_REVIEWERS: `Please select at least ${VALIDATION.MIN_REVIEWERS} reviewers.`,
+  INVALID_DATE: 'Please select a valid date.',
+  INVALID_CONTENT_LENGTH: `Content must be at least ${VALIDATION.CONTENT_MIN_LENGTH} characters long.`
 };
 
 // Success Messages
@@ -57,7 +62,14 @@ export const SUCCESS_MESSAGES = {
   REVIEW_SUBMITTED: 'Review submitted successfully.',
   CONFERENCE_CREATED: 'Conference created successfully.',
   REGISTRATION_SUCCESS: 'Registration successful. Please log in.',
-  PROFILE_UPDATED: 'Profile updated successfully.'
+  PROFILE_UPDATED: 'Profile updated successfully.',
+  PASSWORD_UPDATED: 'Password updated successfully.'
+};
+
+// Date Formats
+export const DATE_FORMATS = {
+  DISPLAY: 'MMMM D, YYYY',
+  INPUT: 'YYYY-MM-DD'
 };
 
 // Pagination

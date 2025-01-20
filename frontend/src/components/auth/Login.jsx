@@ -1,7 +1,7 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { loginUser } from '../../services/auth';
+import apiService from '../../services/api';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +10,7 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useContext(useAuth);
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -22,8 +22,8 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await loginUser(formData);
-      login(response.token, response.user);
+      const response = await apiService.login(formData);
+      login(response.data.token, response.data.user);
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
@@ -40,11 +40,15 @@ const Login = () => {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="text-red-500 text-center">{error}</div>
+            <div className="rounded-md bg-red-50 p-4">
+              <div className="text-sm text-red-700">{error}</div>
+            </div>
           )}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
+              <label htmlFor="email" className="sr-only">Email address</label>
               <input
+                id="email"
                 name="email"
                 type="email"
                 required
@@ -55,7 +59,9 @@ const Login = () => {
               />
             </div>
             <div>
+              <label htmlFor="password" className="sr-only">Password</label>
               <input
+                id="password"
                 name="password"
                 type="password"
                 required
@@ -66,6 +72,7 @@ const Login = () => {
               />
             </div>
           </div>
+
           <div>
             <button
               type="submit"

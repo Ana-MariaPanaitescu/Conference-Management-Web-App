@@ -20,6 +20,7 @@ const ReviewList = ({ articleId }) => {
         setLoading(false);
       }
     };
+
     fetchReviews();
   }, [articleId]);
 
@@ -29,33 +30,66 @@ const ReviewList = ({ articleId }) => {
     ));
   };
 
-  if (loading) return <div>Loading reviews...</div>;
-  if (error) return <div className="text-red-600">{error}</div>;
+  const getStatusColor = (status) => {
+    const colors = {
+      accepted: 'bg-green-100 text-green-800',
+      rejected: 'bg-red-100 text-red-800',
+      'needs revision': 'bg-yellow-100 text-yellow-800'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-32">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border-l-4 border-red-500 p-4">
+        <p className="text-red-700">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {reviews.map(review => (
-        <div key={review.id} className="bg-white p-6 rounded-lg shadow-md">
-          <div className="mb-4">
-            <span className="font-semibold">Reviewer:</span> {review.reviewer.name}
-          </div>
-          <div className="mb-4">
-            <span className="font-semibold">Status:</span> {review.status}
-          </div>
-          {review.feedback && (
-            <div className="mb-4">
-              <span className="font-semibold">Feedback:</span>
-              <p className="mt-2 whitespace-pre-wrap">{review.feedback}</p>
+      {reviews.length === 0 ? (
+        <p className="text-gray-500 text-center py-4">No reviews available yet.</p>
+      ) : (
+        reviews.map(review => (
+          <div key={review.id} className="bg-white shadow-md rounded-lg p-6">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h4 className="text-lg font-medium text-gray-900">
+                  Review by {review.reviewer.name}
+                </h4>
+                <p className="text-sm text-gray-500">{review.reviewer.email}</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(review.status)}`}>
+                {review.status}
+              </span>
             </div>
-          )}
-          {user.role === 'reviewer' && user.id === review.reviewer.id && (
-            <div className="mt-4">
-              <h4 className="text-lg font-semibold mb-2">Update Review</h4>
-              <ReviewForm review={review} onReviewUpdate={handleReviewUpdate} />
-            </div>
-          )}
-        </div>
-      ))}
+
+            {review.feedback && (
+              <div className="mb-6">
+                <h5 className="text-sm font-medium text-gray-700 mb-2">Feedback</h5>
+                <p className="text-gray-600 whitespace-pre-wrap">{review.feedback}</p>
+              </div>
+            )}
+
+            {user.role === 'reviewer' && user.id === review.reviewer.id && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <h5 className="text-lg font-medium text-gray-900 mb-4">Update Review</h5>
+                <ReviewForm review={review} onReviewUpdate={handleReviewUpdate} />
+              </div>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 };

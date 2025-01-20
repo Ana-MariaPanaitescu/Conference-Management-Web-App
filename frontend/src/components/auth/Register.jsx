@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { registerUser } from '../../services/auth';
+import apiService from '../../services/api';
 
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    role: 'author'
+    role: ''
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await registerUser(formData);
+      await apiService.register(formData);
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
@@ -34,12 +34,14 @@ const Register = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create a new account
+            Create your account
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="text-red-500 text-center">{error}</div>
+            <div className="rounded-md bg-red-50 p-4">
+              <div className="text-sm text-red-700">{error}</div>
+            </div>
           )}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
@@ -78,18 +80,19 @@ const Register = () => {
             <div>
               <select
                 name="role"
-                value={formData.role}
-                onChange={handleChange}
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                value={formData.role}
+                onChange={handleChange}
               >
-                <option value="">Select a role</option>
+                <option value="">Select your role</option>
                 <option value="author">Author</option>
                 <option value="reviewer">Reviewer</option>
                 <option value="organizer">Organizer</option>
               </select>
             </div>
           </div>
+
           <div>
             <button
               type="submit"

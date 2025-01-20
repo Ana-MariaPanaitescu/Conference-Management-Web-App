@@ -1,6 +1,24 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+
+const NavLink = ({ to, children }) => {
+  const location = useLocation();
+  const isActive = location.pathname === to;
+  
+  return (
+    <Link
+      to={to}
+      className={`px-3 py-2 rounded-md text-sm font-medium ${
+        isActive
+          ? 'bg-gray-900 text-white'
+          : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+      }`}
+    >
+      {children}
+    </Link>
+  );
+};
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -12,54 +30,78 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-lg">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <Link to="/" className="flex items-center">
-              <span className="text-xl font-semibold">Conference Manager</span>
+    <nav className="bg-gray-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <Link to="/" className="flex-shrink-0">
+              <span className="text-white font-bold text-xl">Conference Manager</span>
             </Link>
+            
             {user && (
-              <div className="ml-10 flex items-center space-x-4">
-                <Link to="/conferences" className="text-gray-700 hover:text-gray-900">
-                  Conferences
-                </Link>
-                {user.role === 'author' && (
-                  <Link to="/articles" className="text-gray-700 hover:text-gray-900">
-                    My Articles
-                  </Link>
-                )}
-                {user.role === 'reviewer' && (
-                  <Link to="/reviews" className="text-gray-700 hover:text-gray-900">
-                    My Reviews
-                  </Link>
-                )}
+              <div className="hidden md:block ml-10">
+                <div className="flex items-baseline space-x-4">
+                  <NavLink to="/dashboard">Dashboard</NavLink>
+                  <NavLink to="/conferences">Conferences</NavLink>
+                  
+                  {user.role === 'author' && (
+                    <NavLink to="/articles">My Articles</NavLink>
+                  )}
+                  
+                  {user.role === 'reviewer' && (
+                    <NavLink to="/reviews">My Reviews</NavLink>
+                  )}
+                </div>
               </div>
             )}
           </div>
-          <div className="flex items-center">
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-700">{user.name}</span>
-                <button
-                  onClick={handleLogout}
-                  className="text-gray-700 hover:text-gray-900"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-4">
-                <Link to="/login" className="text-gray-700 hover:text-gray-900">
-                  Login
-                </Link>
-                <Link to="/register" className="text-gray-700 hover:text-gray-900">
-                  Register
-                </Link>
-              </div>
-            )}
+
+          <div className="hidden md:block">
+            <div className="ml-4 flex items-center md:ml-6">
+              {user ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-gray-300 text-sm">{user.name}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="flex space-x-4">
+                  <NavLink to="/login">Login</NavLink>
+                  <NavLink to="/register">Register</NavLink>
+                </div>
+              )}
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Mobile menu */}
+      <div className="md:hidden">
+        {user && (
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <NavLink to="/dashboard">Dashboard</NavLink>
+            <NavLink to="/conferences">Conferences</NavLink>
+            
+            {user.role === 'author' && (
+              <NavLink to="/articles">My Articles</NavLink>
+            )}
+            
+            {user.role === 'reviewer' && (
+              <NavLink to="/reviews">My Reviews</NavLink>
+            )}
+            
+            <button
+              onClick={handleLogout}
+              className="w-full text-left text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </div>
     </nav>
   );

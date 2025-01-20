@@ -1,34 +1,44 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/auth/PrivateRoute';
 import Navbar from './components/common/Navbar';
+
+// Auth Components
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+
+// Common Components
 import Dashboard from './components/common/Dashboard';
+
+// Conference Components
 import ConferenceList from './components/conference/ConferenceList';
 import ConferenceCreate from './components/conference/ConferenceCreate';
 import ConferenceDetails from './components/conference/ConferenceDetails';
+
+// Article Components
 import ArticleList from './components/article/ArticleList';
 import ArticleCreate from './components/article/ArticleCreate';
 import ArticleDetails from './components/article/ArticleDetails';
-import ReviewForm from './components/review/ReviewForm';
+
+// Review Components
 import ReviewList from './components/review/ReviewList';
+
 import { USER_ROLES } from './utils/constants';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-gray-50">
           <Navbar />
-          <div className="container mx-auto px-4 py-8">
+          <main className="container mx-auto px-4 py-8">
             <Routes>
-              {/* Public routes */}
+              {/* Public Routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
-              {/* Private routes */}
+              {/* Protected Routes */}
               <Route
                 path="/"
                 element={
@@ -37,6 +47,7 @@ function App() {
                   </PrivateRoute>
                 }
               />
+
               <Route
                 path="/dashboard"
                 element={
@@ -46,7 +57,7 @@ function App() {
                 }
               />
 
-              {/* Conference routes */}
+              {/* Conference Routes */}
               <Route
                 path="/conferences"
                 element={
@@ -72,7 +83,7 @@ function App() {
                 }
               />
 
-              {/* Article routes */}
+              {/* Article Routes */}
               <Route
                 path="/articles"
                 element={
@@ -98,7 +109,7 @@ function App() {
                 }
               />
 
-              {/* Review routes */}
+              {/* Review Routes */}
               <Route
                 path="/reviews"
                 element={
@@ -107,16 +118,11 @@ function App() {
                   </PrivateRoute>
                 }
               />
-              <Route
-                path="/articles/:id/review"
-                element={
-                  <PrivateRoute roles={[USER_ROLES.REVIEWER]}>
-                    <ReviewForm />
-                  </PrivateRoute>
-                }
-              />
+
+              {/* Catch-all route */}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
-          </div>
+          </main>
         </div>
       </Router>
     </AuthProvider>

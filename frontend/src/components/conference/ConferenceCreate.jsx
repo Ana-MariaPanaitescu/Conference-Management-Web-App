@@ -10,6 +10,7 @@ const ConferenceCreate = () => {
     reviewerIds: []
   });
   const [reviewers, setReviewers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -20,6 +21,8 @@ const ConferenceCreate = () => {
         setReviewers(response.data);
       } catch (err) {
         setError('Failed to fetch reviewers');
+      } finally {
+        setLoading(false);
       }
     };
     fetchReviewers();
@@ -46,64 +49,113 @@ const ConferenceCreate = () => {
     });
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Create New Conference</h2>
-      {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block mb-2">Title</label>
-          <input
-            type="text"
-            name="title"
-            className="input-field"
-            value={formData.title}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label className="block mb-2">Description</label>
-          <textarea
-            name="description"
-            className="input-field min-h-[100px]"
-            value={formData.description}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label className="block mb-2">Date</label>
-          <input
-            type="date"
-            name="date"
-            className="input-field"
-            value={formData.date}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label className="block mb-2">Reviewers (select at least 2)</label>
-          <select
-            name="reviewerIds"
-            multiple
-            className="input-field min-h-[100px]"
-            value={formData.reviewerIds}
-            onChange={handleChange}
-            required
-          >
-            {reviewers.map(reviewer => (
-              <option key={reviewer.id} value={reviewer.id}>
-                {reviewer.name} ({reviewer.email})
-              </option>
-            ))}
-          </select>
-        </div>
-        <button type="submit" className="btn btn-primary w-full">
-          Create Conference
-        </button>
-      </form>
+    <div className="max-w-3xl mx-auto p-6">
+      <div className="bg-white shadow-md rounded-lg p-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Conference</h2>
+        
+        {error && (
+          <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4">
+            <p className="text-red-700">{error}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              rows={4}
+              value={formData.description}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="date" className="block text-sm font-medium text-gray-700">
+              Date
+            </label>
+            <input
+              type="date"
+              id="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="reviewerIds" className="block text-sm font-medium text-gray-700">
+              Select Reviewers (minimum 2)
+            </label>
+            <select
+              id="reviewerIds"
+              name="reviewerIds"
+              multiple
+              value={formData.reviewerIds}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              size={5}
+              required
+            >
+              {reviewers.map(reviewer => (
+                <option key={reviewer.id} value={reviewer.id}>
+                  {reviewer.name} ({reviewer.email})
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-sm text-gray-500">
+              Hold Ctrl/Cmd to select multiple reviewers
+            </p>
+          </div>
+
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={() => navigate('/conferences')}
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+            >
+              Create Conference
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
