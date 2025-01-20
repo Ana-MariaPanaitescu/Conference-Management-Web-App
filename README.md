@@ -65,7 +65,7 @@ conference-management/
 1. Start the Backend Server
 ```bash
 cd backend
-npm run dev
+node server.js
 ```
 
 2. Start the Frontend Development Server
